@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket</title>
+</head>
+<body>
+<table style="border: 1px solid black; width: 354px;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid black">Kitob nomi</th>
+            <th style="border: 1px solid black">Author</th>
+            <th style="border: 1px solid black">Band qilish</th>
+        </tr>
+    </thead>
+    <tbody id="trr">
+
+    </tbody>
+    <tfooter>
+        <tr>
+            <td style="border: 1px solid black"><input type="text" name="book" id="addbook"></td>
+            <td style="border: 1px solid black">
+                <select name="cars" id="author">
+                    <option value="1">Author 1</option>
+                    <option value="2">Author 2</option>
+                </select>
+            </td>
+            <td></td>
+        </tr>
+    </tfooter>
+</table>
+<button onclick="olish();" style="margin-top: 15px"> Kitoblar ro'yxatini olish</button>
+<button onclick="qoshish();" style="margin-top: 15px"> Qo'shish</button>
+
+<div>
+    <ul>
+        <li>Messages</li>
+    </ul>
+</div>
+
+<input type="text" name="Text" id="msg">
+
+<button onclick="jonat();"> Jo'natish</button>
+<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script>
+
+    var socket = new WebSocket("ws://localhost:8000/ws/book/");
+
+
+    socket.onopen = function () {
+        console.log("Connected")
+    };
+
+    socket.onclose = function (event) {
+        if (event.wasClean) {
+            alert('Соединение закрыто чисто');
+            console.log('Clean close')
+        } else {
+            console.log('Close by error')
+        }
+        console.log('Код: ' + event.code + ' причина: ' + event.reason)
+    };
+
+    socket.onmessage = function (event) {
+        let response = JSON.parse(event.data)
+        data = response['data']
+        console.log(data)
+        if (data['type'] == 'get_book'){
+            $("#trr").empty();
+            for (p of data['books']){
+                console.log(p['book']);
+                var tr = `<tr>
+                                <td style="border: 1px solid black">`+ p['book'] +`</td>
+                                <td style="border: 1px solid black">`+ p['author'] +`</td>
+                                <td><button onclick="bandqilish(`+ p['id'] +`);"> Band qilish</button></td>
+                            </tr>`;
+                $("#trr").append(tr);
+            }
+        }else if (data['type'] == 'add_book'){
+            var tr = `<tr>
+                            <td style="border: 1px solid black">`+ data['book'] +`</td>
+                            <td style="border: 1px solid black">`+ data['author'] +`</td>
+                            <td><button onclick="bandqilish(`+ data['id'] +`);"> Band qilish</button></td>
+                        </tr>`;
+                $("#trr").append(tr);
+                $("#addbook").val("")
+                var dropDown = document.getElementById("author");
+                dropDown.selectedIndex = 0;
+        }else if (data['type'] == 'buyurtma'){
+            alert(data['message']);
+        }else if (data['type'] == 'add_chat'){
+            console.log(data['user']);
+        }
+
+        //
+        // let message = String(response['message'])
+        // let liObject = document.createElement('li')
+        // liObject.innerText = message
+        // document.querySelector('ul').append(liObject)
+    };
+
+    socket.onerror = function (error) {
+        console.log(error.message)
+    };
+
+    function olish() {
+        socket.send(JSON.stringify({
+            "type":"get_book"
+        }));
+    }
+    function qoshish() {
+        console.log(document.getElementById('addbook').value,document.getElementById('author').value)
+        socket.send(JSON.stringify({
+            "type":"add_book",
+            'data':{
+                "book":document.getElementById('addbook').value,
+                "author":document.getElementById('author').value
+            }
+        }));
+    }
+    function bandqilish(id){
+        socket.send(JSON.stringify({
+            "type":"buyurtma",
+            'id':id,
+            'user':1,
+        }));
+    }
+
+
+    var socket1 = new WebSocket("ws://localhost:8000/ws/chatting/");
+
+    socket1.onopen = function () {
+        console.log("Connected")
+    };
+
+    socket1.onclose = function (event) {
+        if (event.wasClean) {
+            alert('Соединение закрыто чисто');
+            console.log('Clean close')
+        } else {
+            console.log('Close by error')
+        }
+        console.log('Код: ' + event.code + ' причина: ' + event.reason)
+    };
+
+    socket1.onmessage = function (event) {
+        let response = JSON.parse(event.data)
+        console.log(response)
+
+        let message = String(response['msg'])
+        let liObject = document.createElement('li')
+        liObject.innerText = message
+        document.querySelector('ul').append(liObject)
+    };
+
+    socket1.onerror = function (error) {
+        console.log(error.message)
+    };
+
+    function jonat() {
+        let message = document.getElementById('msg').value;
+        socket1.send(JSON.stringify({
+            "type": 'add_chat',
+            "user": 1,
+            "msg": message
+        }));
+    }
+
+</script>
+</body>
+</html>
