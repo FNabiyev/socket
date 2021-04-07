@@ -13,7 +13,7 @@
             <th style="border: 1px solid black">Band qilish</th>
         </tr>
     </thead>
-    <tbody id="trr">
+    <tbody id="tr1">
 
     </tbody>
     <tfooter>
@@ -29,8 +29,8 @@
         </tr>
     </tfooter>
 </table>
-<button onclick="olish();" style="margin-top: 15px"> Kitoblar ro'yxatini olish</button>
-<button onclick="qoshish();" style="margin-top: 15px"> Qo'shish</button>
+<button onclick="olish();" style="margin-top: 15px"> Band kitoblar</button>
+<button onclick="qoshish();" style="margin-top: 15px"> Kitob qo'shish</button>
 
 <div>
     <ul>
@@ -41,6 +41,35 @@
 <input type="text" name="Text" id="msg">
 
 <button onclick="jonat();"> Jo'natish</button>
+
+<table style="border: 1px solid black; width: 354px; margin-top: 15px;">
+    <thead>
+        <tr>
+            <th style="border: 1px solid black">Kitob nomi</th>
+            <th style="border: 1px solid black">Author</th>
+            <th style="border: 1px solid black">Bekor qilish</th>
+        </tr>
+    </thead>
+    <tbody id="tr0">
+
+    </tbody>
+    <tfooter>
+        <tr>
+            <td style="border: 1px solid black"><input type="text" name="book" id="addbook"></td>
+            <td style="border: 1px solid black">
+                <select name="cars" id="author">
+                    <option value="1">Author 1</option>
+                    <option value="2">Author 2</option>
+                </select>
+            </td>
+            <td></td>
+        </tr>
+    </tfooter>
+</table>
+<button onclick="olish0();" style="margin-top: 15px"> Bo'sh kitoblarni olish</button>
+<button onclick="qoshish();" style="margin-top: 15px"> Kitob qo'shish</button>
+
+
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script>
 
@@ -65,8 +94,9 @@
         let response = JSON.parse(event.data)
         data = response['data']
         console.log(data)
-        if (data['type'] == 'get_book'){
-            $("#trr").empty();
+        if (data['type'] == 'status1'){
+            console.log("sasas")
+            $("#tr1").empty();
             for (p of data['books']){
                 console.log(p['book']);
                 var tr = `<tr>
@@ -74,15 +104,15 @@
                                 <td style="border: 1px solid black">`+ p['author'] +`</td>
                                 <td><button onclick="bandqilish(`+ p['id'] +`);"> Band qilish</button></td>
                             </tr>`;
-                $("#trr").append(tr);
+                $("#tr1").append(tr);
             }
         }else if (data['type'] == 'add_book'){
             var tr = `<tr>
                             <td style="border: 1px solid black">`+ data['book'] +`</td>
                             <td style="border: 1px solid black">`+ data['author'] +`</td>
-                            <td><button onclick="bandqilish(`+ data['id'] +`);"> Band qilish</button></td>
+                            <td><button onclick="bandqilish(`+ data['id'] +`);"> Bekor qilish</button></td>
                         </tr>`;
-                $("#trr").append(tr);
+                $("#tr1").append(tr);
                 $("#addbook").val("")
                 var dropDown = document.getElementById("author");
                 dropDown.selectedIndex = 0;
@@ -90,6 +120,18 @@
             alert(data['message']);
         }else if (data['type'] == 'add_chat'){
             console.log(data['user']);
+        }else if (data['type'] == 'status0'){
+            console.log(data['type']);
+            $("#tr0").empty();
+            for (p of data['books']){
+                console.log(p['book']);
+                var tr = `<tr>
+                                <td style="border: 1px solid black">`+ p['book'] +`</td>
+                                <td style="border: 1px solid black">`+ p['author'] +`</td>
+                                <td><button onclick="bandqilish(`+ p['id'] +`);"> Band qilish</button></td>
+                            </tr>`;
+                $("#tr0").append(tr);
+            }
         }
 
         //
@@ -105,7 +147,13 @@
 
     function olish() {
         socket.send(JSON.stringify({
-            "type":"get_book"
+            "type":"status1"
+        }));
+    }
+    function olish0() {
+        console.log('ssss')
+        socket.send(JSON.stringify({
+            "type":"status0"
         }));
     }
     function qoshish() {

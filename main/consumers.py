@@ -24,7 +24,6 @@ class BookSocket(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        print(data)
         send_data = await self.ReciveData(data)
         await self.send(text_data=json.dumps(send_data))
 
@@ -41,12 +40,15 @@ class BookSocket(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps(data))
 
     async def ReciveData(self, data):
-        if data['type'] == "get_book":
-            data['data'] = await self.get_book()
+        if data['type'] == "status1":
+            data['data'] = await self.status1()
         elif data['type'] == "add_book":
             data['data'] = await self.add_book(data['data'])
         elif data['type'] == "buyurtma":
             data['data'] = await self.buyurtma(data)
+        elif data['type'] == "status0":
+            print("status111")
+            data['data'] = await self.status0()
 
         return data
 
@@ -63,8 +65,8 @@ class BookSocket(AsyncWebsocketConsumer):
         return data
 
     @database_sync_to_async
-    def get_book(self):
-        books = Books.objects.filter(status=False).order_by('-id')
+    def status1(self):
+        books = Books.objects.filter(status=True).order_by('-id')
         dt = []
         for b in books:
             t = {
@@ -74,7 +76,7 @@ class BookSocket(AsyncWebsocketConsumer):
             }
             dt.append(t)
         data = {
-            'type': 'get_book',
+            'type': 'status1',
             'books': dt
         }
         return data
@@ -89,6 +91,23 @@ class BookSocket(AsyncWebsocketConsumer):
 
         return dt
 
+    @database_sync_to_async
+    def status0(self):
+        print('asdsa')
+        books = Books.objects.filter(status=False).order_by('-id')
+        dt = []
+        for b in books:
+            t = {
+                'id': b.id,
+                'book': b.name,
+                'author': b.author.name,
+            }
+            dt.append(t)
+        data = {
+            'type': 'status0',
+            'books': dt
+        }
+        return data
 
 class ChattingSocket(AsyncWebsocketConsumer):
 
