@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,76 +6,42 @@
     <title>WebSocket</title>
 </head>
 <body>
+
 <table style="border: 1px solid black; width: 354px;">
     <thead>
         <tr>
-            <th style="border: 1px solid black">Kitob nomi</th>
+            <th style="border: 1px solid black">Kitob</th>
             <th style="border: 1px solid black">Author</th>
             <th style="border: 1px solid black">Band qilish</th>
         </tr>
     </thead>
-    <tbody id="tr1">
-
-    </tbody>
-    <tfooter>
+    <tbody id="book0">
         <tr>
-            <td style="border: 1px solid black"><input type="text" name="book" id="addbook"></td>
-            <td style="border: 1px solid black">
-                <select name="cars" id="author">
-                    <option value="1">Author 1</option>
-                    <option value="2">Author 2</option>
-                </select>
-            </td>
-            <td></td>
+
         </tr>
-    </tfooter>
+    </tbody>
 </table>
-<button onclick="olish();" style="margin-top: 15px"> Band kitoblar</button>
-<button onclick="qoshish();" style="margin-top: 15px"> Kitob qo'shish</button>
+<button onclick="bookzero();" style="margin-top: 15px"> Bo'sh kitoblarnilarni olish</button>
 
-<div>
-    <ul>
-        <li>Messages</li>
-    </ul>
-</div>
-
-<input type="text" name="Text" id="msg">
-
-<button onclick="jonat();"> Jo'natish</button>
-
-<table style="border: 1px solid black; width: 354px; margin-top: 15px;">
+<table style="border: 1px solid black; width: 354px; margin-top: 15px">
     <thead>
         <tr>
-            <th style="border: 1px solid black">Kitob nomi</th>
+            <th style="border: 1px solid black">Kitob</th>
             <th style="border: 1px solid black">Author</th>
-            <th style="border: 1px solid black">Bekor qilish</th>
+            <th style="border: 1px solid black">Bo'shatish</th>
         </tr>
     </thead>
-    <tbody id="tr0">
-
-    </tbody>
-    <tfooter>
+    <tbody id="book1">
         <tr>
-            <td style="border: 1px solid black"><input type="text" name="book" id="addbook"></td>
-            <td style="border: 1px solid black">
-                <select name="cars" id="author">
-                    <option value="1">Author 1</option>
-                    <option value="2">Author 2</option>
-                </select>
-            </td>
-            <td></td>
+
         </tr>
-    </tfooter>
+    </tbody>
 </table>
-<button onclick="olish0();" style="margin-top: 15px"> Bo'sh kitoblarni olish</button>
-<button onclick="qoshish();" style="margin-top: 15px"> Kitob qo'shish</button>
-
-
+<button onclick="bookone();" style="margin-top: 15px"> Band kitoblarni olish</button>
 <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
 <script>
 
     var socket = new WebSocket("ws://localhost:8000/ws/book/");
-
 
     socket.onopen = function () {
         console.log("Connected")
@@ -91,129 +58,86 @@
     };
 
     socket.onmessage = function (event) {
-        let response = JSON.parse(event.data)
-        data = response['data']
+        let response = JSON.parse(event.data);
+        console.log(response)
+        let data = response['data'];
         console.log(data)
-        if (data['type'] == 'status1'){
-            console.log("sasas")
-            $("#tr1").empty();
+        if (data['type'] == 'book0'){
+            console.log(data['type'], 'type1111')
+            $("#book0").empty();
             for (p of data['books']){
-                console.log(p['book']);
+                console.log(p['name']);
                 var tr = `<tr>
                                 <td style="border: 1px solid black">`+ p['book'] +`</td>
                                 <td style="border: 1px solid black">`+ p['author'] +`</td>
-                                <td><button onclick="bandqilish(`+ p['id'] +`);"> Band qilish</button></td>
+                                <td style="border: 1px solid black"><button onclick="bandqilish(`+ p['id'] +`);"> Band qilish</button></td>
                             </tr>`;
-                $("#tr1").append(tr);
+                $("#book0").append(tr);
             }
-        }else if (data['type'] == 'add_book'){
-            var tr = `<tr>
-                            <td style="border: 1px solid black">`+ data['book'] +`</td>
-                            <td style="border: 1px solid black">`+ data['author'] +`</td>
-                            <td><button onclick="bandqilish(`+ data['id'] +`);"> Bekor qilish</button></td>
-                        </tr>`;
-                $("#tr1").append(tr);
-                $("#addbook").val("")
-                var dropDown = document.getElementById("author");
-                dropDown.selectedIndex = 0;
-        }else if (data['type'] == 'buyurtma'){
-            alert(data['message']);
-        }else if (data['type'] == 'add_chat'){
-            console.log(data['user']);
-        }else if (data['type'] == 'status0'){
-            console.log(data['type']);
-            $("#tr0").empty();
+        }else if (data['type'] == 'book1'){
+            console.log(data['type'])
+            $("#book1").empty();
             for (p of data['books']){
-                console.log(p['book']);
+                console.log(p['name']);
                 var tr = `<tr>
-                                <td style="border: 1px solid black">`+ p['book'] +`</td>
+                                <td style="border: 1px solid black">`+ p['name'] +`</td>
                                 <td style="border: 1px solid black">`+ p['author'] +`</td>
-                                <td><button onclick="bandqilish(`+ p['id'] +`);"> Band qilish</button></td>
+                                <td style="border: 1px solid black"><button onclick="boshatish(`+ p['id'] +`);"> Bo'shatish</button></td>
                             </tr>`;
-                $("#tr0").append(tr);
+                $("#book1").append(tr);
+            }
+        }
+        else if (data['type'] == 'book0and1'){
+            console.log(data['type'])
+            $("#book0").empty();
+            for (p of data['books0']){
+                console.log(p['name']);
+                var tr = `<tr>
+                                <td style="border: 1px solid black">`+ p['name'] +`</td>
+                                <td style="border: 1px solid black">`+ p['author'] +`</td>
+                                <td style="border: 1px solid black"><button onclick="bandqilish(`+ p['id'] +`);"> Band qilish</button></td>
+                            </tr>`;
+                $("#book0").append(tr);
+            }
+            $("#book1").empty();
+            for (p of data['books1']){
+                console.log(p['name']);
+                var tr = `<tr>
+                                <td style="border: 1px solid black">`+ p['name'] +`</td>
+                                <td style="border: 1px solid black">`+ p['author'] +`</td>
+                                <td style="border: 1px solid black"><button onclick="boshatish(`+ p['id'] +`);"> Bo'shatish</button></td>
+                            </tr>`;
+                $("#book1").append(tr);
             }
         }
 
-        //
-        // let message = String(response['message'])
-        // let liObject = document.createElement('li')
-        // liObject.innerText = message
-        // document.querySelector('ul').append(liObject)
     };
 
     socket.onerror = function (error) {
         console.log(error.message)
     };
-
-    function olish() {
+    function bookzero() {
         socket.send(JSON.stringify({
-            "type":"status1"
+            "type":"book0"
         }));
     }
-    function olish0() {
-        console.log('ssss')
+    function bookone() {
         socket.send(JSON.stringify({
-            "type":"status0"
-        }));
-    }
-    function qoshish() {
-        console.log(document.getElementById('addbook').value,document.getElementById('author').value)
-        socket.send(JSON.stringify({
-            "type":"add_book",
-            'data':{
-                "book":document.getElementById('addbook').value,
-                "author":document.getElementById('author').value
-            }
+            "type":"book1"
         }));
     }
     function bandqilish(id){
         socket.send(JSON.stringify({
-            "type":"buyurtma",
-            'id':id,
-            'user':1,
+            "type":"busy1",
+            "id":id
         }));
     }
-
-
-    var socket1 = new WebSocket("ws://localhost:8000/ws/chatting/");
-
-    socket1.onopen = function () {
-        console.log("Connected")
-    };
-
-    socket1.onclose = function (event) {
-        if (event.wasClean) {
-            alert('Соединение закрыто чисто');
-            console.log('Clean close')
-        } else {
-            console.log('Close by error')
-        }
-        console.log('Код: ' + event.code + ' причина: ' + event.reason)
-    };
-
-    socket1.onmessage = function (event) {
-        let response = JSON.parse(event.data)
-        console.log(response)
-
-        let message = String(response['msg'])
-        let liObject = document.createElement('li')
-        liObject.innerText = message
-        document.querySelector('ul').append(liObject)
-    };
-
-    socket1.onerror = function (error) {
-        console.log(error.message)
-    };
-
-    function jonat() {
-        let message = document.getElementById('msg').value;
-        socket1.send(JSON.stringify({
-            "type": 'add_chat',
-            "user": 1,
-            "msg": message
+    function boshatish(id){
+        socket.send(JSON.stringify({
+            "type":"busy0",
+            "id":id
         }));
     }
-
 </script>
 </body>
 </html>
